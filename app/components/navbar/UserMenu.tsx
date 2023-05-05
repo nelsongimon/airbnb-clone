@@ -1,20 +1,36 @@
 'use client';
 
 import useRegisterModal from '@/app/hooks/useRegisterModal';
+import useLoginModal from '@/app/hooks/useLoginModal';
 import { AiOutlineMenu } from 'react-icons/ai';
 import { useCallback, useState } from 'react';
-import Avatar from '../Avatar';
+import { signOut } from 'next-auth/react';
+import { SafeUser } from '@/app/types';
 import MenuItem from './MenuItem';
+import Avatar from '../Avatar';
+import useRentModal from '@/app/hooks/useRentModal';
 
-export default function UserMenu() {
+interface UserMenuProps {
+  currentUser?: SafeUser | null;
+}
+
+export default function UserMenu({ currentUser }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const registerModal = useRegisterModal();
+  const loginModal = useLoginModal();
+  const rentModal = useRentModal();
   
   const toggleOpen = useCallback(() => {
       setIsOpen(value => !value);
     }, []
   );
   
+  const onRent = useCallback(() => {
+    if (!currentUser) {
+      return loginModal.onOpen();
+    }
+    rentModal.onOpen();
+  }, [currentUser, loginModal, rentModal]);
 
   return (
     <div className="relative">
@@ -22,7 +38,7 @@ export default function UserMenu() {
         flex items-center gap-3
       ">
         <div
-          onClick={() => {}}
+          onClick={onRent}
           className="
             hidden
             md:block
@@ -56,7 +72,7 @@ export default function UserMenu() {
         >
           <AiOutlineMenu />
           <div className="hidden md:block">
-            <Avatar /> 
+            <Avatar src={currentUser?.image} /> 
           </div>
         </div>
       </div>
@@ -74,10 +90,22 @@ export default function UserMenu() {
           text-sm
         ">
           <div className="flex flex-col cursor-pointer">
-            <>
-              <MenuItem onClick={() => {}} label="Login" />
-              <MenuItem onClick={registerModal.onOpen} label="Sign up" />
-            </>
+            {currentUser ? (
+              <>
+                <MenuItem onClick={() => {}} label="My trips" />
+                <MenuItem onClick={() => {}} label="My favorites" />
+                <MenuItem onClick={() => {}} label="My properties" />
+                <MenuItem onClick={rentModal.onOpen} label="Airbnb my home" />
+                <hr/>
+                <MenuItem onClick={() => signOut()} label="Logout" />
+
+              </>
+            ) : (
+              <>
+                <MenuItem onClick={loginModal.onOpen} label="Login" />
+                <MenuItem onClick={registerModal.onOpen} label="Sign up" />
+              </>
+            )}
           </div>
         </div>
       )}

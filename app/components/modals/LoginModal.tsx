@@ -12,17 +12,20 @@ import Heading from '../Heading';
 import Button from '../Button';
 import Modal from './Modal';
 import axios from 'axios'; 
+
+
 import {
   FieldValues,
   SubmitHandler,
   useForm
 } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 
 
-
-export default function RegisterModal() {
-  const registerModal = useRegisterModal();
+export default function LoginModal() {
+  const router = useRouter();
   const loginModal = useLoginModal();
+  const registerModal = useRegisterModal();
   const [isLoading, setIsLoading] = useState(false);
   const {
     register,
@@ -30,7 +33,6 @@ export default function RegisterModal() {
     formState: { errors }
   } = useForm<FieldValues>({
     defaultValues: {
-      name: '',
       email: '',
       password: '',
     }
@@ -38,23 +40,28 @@ export default function RegisterModal() {
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
-    axios.post('/api/register', data)
-      .then(() => {
-        registerModal.onClose();
-      })
-      .catch((error) => {
-        console.log(error);
-        toast.error('Somthing went wrong');
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    signIn('credentials', {
+      ...data,
+      redirect: false,
+    })
+    .then((callback) => {
+      setIsLoading(false);
+      if (callback?.ok) {
+        toast.success('Login successfully');
+        router.refresh();
+        loginModal.onClose();
+      }
+
+      if(callback?.error) {
+        toast.error(callback.error);
+      }
+    })
   }
 
   const toggle = useCallback(() => {
-    registerModal.onClose();
-    loginModal.onOpen();
-  }, [registerModal, loginModal]);
+    loginModal.onClose();
+    registerModal.onOpen();
+  }, [loginModal, registerModal])
 
   const bodyContent = (
     <div className="
@@ -63,20 +70,12 @@ export default function RegisterModal() {
       gap-4
     ">
       <Heading
-        title="Welcome to Aribnb"
-        subtitle="Create an account!"
+        title="Welcome back"
+        subtitle="Login to your account!"
       />
       <Input 
         id="email"
         label="Email"
-        disabled={isLoading}
-        register={register}
-        errors={errors}
-        required
-      />
-      <Input 
-        id="name"
-        label="Name"
         disabled={isLoading}
         register={register}
         errors={errors}
@@ -117,13 +116,13 @@ export default function RegisterModal() {
       ">
         <div className="flex items-center gap-2 justify-center">
           <div>
-            Already have an account?
+            First time using Airbnb?
           </div>
           <div 
           onClick={toggle}
           className="text-neutral-800 cursor-pointer hover:underline
           ">
-            Log in
+            Create an account
           </div>
         </div>
       </div>
@@ -133,10 +132,10 @@ export default function RegisterModal() {
   return (
     <Modal 
       disabled={isLoading}
-      isOpen={registerModal.isOpen}
-      title="Register"
-      actionLabel="Continue"
-      onClose={registerModal.onClose}
+      isOpen={loginModal.isOpen}
+      title="Login"
+      actionLabel="Sign in"
+      onClose={loginModal.onClose}
       onSubmit={handleSubmit(onSubmit)}
       body={bodyContent}
       footer={footerContent}

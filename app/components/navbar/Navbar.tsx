@@ -1,11 +1,17 @@
 'use client';
 
+import { SafeUser } from '@/app/types';
+import Categories from './Categories';
 import Container from '../Container';
 import UserMenu from './UserMenu';
 import Search from './Search';
 import Logo from './Logo';
 
-export default function Navbar() {
+interface NavbarProps {
+  currentUser?: SafeUser | null;
+}
+
+export default function Navbar({ currentUser } : NavbarProps) {
   return (
     <div className="fixed w-full bg-white z-10 shadow-sm">
       <div className="
@@ -22,10 +28,11 @@ export default function Navbar() {
           ">
             <Logo />
             <Search />
-            <UserMenu />
+            <UserMenu currentUser={currentUser} />
           </div>
         </Container>
       </div>
+      <Categories />
     </div>
   );
 }

@@ -10,6 +10,7 @@ export default function Logo() {
   }
   return (
     <Image 
+      onClick={handlerClick}
       src="/images/logo.png"
       alt="Logo"
       className="hidden md:block cursor-pointer"
