@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 import Heading from '../Heading';
 import Modal from './Modal';
 import ImageUpload from '../inputs/ImageUpload';
+import Input from '../inputs/Input';
 
 enum STEPS  {
   CATEGORY = 0,
@@ -25,6 +26,7 @@ enum STEPS  {
 export default function RentModal() {
   const rentModal = useRentModal();
   const [step, setStep] = useState(STEPS.CATEGORY);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
@@ -177,6 +179,34 @@ export default function RentModal() {
         <ImageUpload
           value={imageSrc}
           onChange={(value) => setCustomValue('imageSrc', value)}
+        />
+      </div>
+    )
+  }
+
+  if (step === STEPS.DESCRIPTION) {
+    bodyContent = (
+      <div className="flex flex-col gap-8">
+        <Heading 
+          title="How would you describe your place?"
+          subtitle="Short and sweet works best!"
+        />
+        <Input 
+          id="title"
+          label="Title"
+          disabled={isLoading}
+          errors={errors}
+          required
+          register={register}
+        />
+        <hr/>
+        <Input 
+          id="description"
+          label="Description"
+          disabled={isLoading}
+          errors={errors}
+          required
+          register={register}
         />
       </div>
     )
